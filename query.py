@@ -45,44 +45,50 @@ def start_query():
         "Content-Type": "application/json",
         "Authorization": f"token {API_KEY}"
     }
-
     debug_log(f"Request URL: {url}")
     debug_log(f"Request Headers: {json.dumps(headers, indent=4)}")
     debug_log(f"Request Body: {json.dumps(data, indent=4)}")
 
     response = requests.post(url, json=data, headers=headers)
-
     debug_log(f"Response Status Code: {response.status_code}")
     debug_log(f"Response Body: {response.text}")
 
     if response.status_code not in [200, 202]:
         verbose_log("Failed to start query due to an unexpected response.")
         exit(1)
+
     return response.json().get("query_id")
+
+
 # Function to retrieve query results
 def retrieve_results(query_id):
-    max_attempts = 5
+    max_attempts = 50
+    attempt_delay = 10  # seconds to wait between attempts
     for attempt in range(1, max_attempts + 1):
         verbose_log(f"Attempt {attempt} to retrieve results for query ID {query_id}")
-        url = f"{LOGZILLA_INSTANCE}/api/query/{query_id}?actions_hint=true&add_geoip_data=false&add_trigger_data=true&offset=0&page=1&page_size=50"
+        url = f"{LOGZILLA_INSTANCE}/api/query/{query_id}"
         headers = {"Authorization": f"token {API_KEY}"}
 
         debug_log(f"Request URL: {url}")
         debug_log(f"Request Headers: {json.dumps(headers, indent=4)}")
 
         response = requests.get(url, headers=headers)
-
         debug_log(f"Response Status Code: {response.status_code}")
         debug_log(f"Response Body: {response.text}")
 
-        if 'results' in response.json():
-            return response.json()
+        response_json = response.json()
+        if response_json.get('status') == "IN_PROGRESS":
+            verbose_log("Query is still in progress. Waiting before next attempt...")
+            time.sleep(attempt_delay)  # Wait before the next attempt
+            continue  # Skip the rest of the current loop iteration
+        elif 'results' in response_json:
+            return response_json
         else:
-            verbose_log("Query results not ready yet. Retrying in 5 seconds...")
-            time.sleep(5)
-    verbose_log("Failed to retrieve query results after max attempts. Please try again later.")
-    exit(1)
+            verbose_log("Failed to retrieve query results. Please try again later.")
+            exit(1)
 
+    verbose_log("Query results not ready after maximum attempts.")
+    exit(1)
 def create_excel_with_chart(data):
     # Convert the data into a DataFrame
     df = pd.json_normalize(data['results']['details'])

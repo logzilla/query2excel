@@ -2,8 +2,17 @@
   "type": "EventRate",
   "params": {
     "time_range": {
-      "preset": "last_31_days"
+      "preset": "last_30_days"
     },
+    "filter": [
+      {
+        "field": "cisco_mnemonic",
+        "op": "eq",
+        "value": [
+        "CIMC-5-LINK_MISSING"
+    ]
+      }
+    ],
     "with_archive": true
   }
 }
