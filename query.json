@@ -1,0 +1,9 @@
+{
+  "type": "EventRate",
+  "params": {
+    "time_range": {
+      "preset": "last_31_days"
+    },
+    "with_archive": true
+  }
+}

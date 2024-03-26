@@ -36,20 +36,16 @@ def verbose_log(message):
 
 # Function to start the query
 def start_query():
+    # Load the query from query.json file
+    with open('query.json', 'r') as file:
+        data = json.load(file)  # Data is loaded from the file
+
     url = f"{LOGZILLA_INSTANCE}/api/query"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"token {API_KEY}"
     }
-    data = {
-        "type": "EventRate",
-        "params": {
-            "time_range": {
-                "preset": "last_31_days"
-            },
-            "with_archive": True
-        }
-    }
+
     debug_log(f"Request URL: {url}")
     debug_log(f"Request Headers: {json.dumps(headers, indent=4)}")
     debug_log(f"Request Body: {json.dumps(data, indent=4)}")
@@ -63,7 +59,6 @@ def start_query():
         verbose_log("Failed to start query due to an unexpected response.")
         exit(1)
     return response.json().get("query_id")
-
 # Function to retrieve query results
 def retrieve_results(query_id):
     max_attempts = 5
