@@ -1,0 +1,6 @@
+.env
+foo
+bar
+*.swp
+.DS_Store
+*.xlsx
