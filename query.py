@@ -135,7 +135,7 @@ def create_excel_with_chart(data):
     # Apply the number format to all cells in the 'Count' column except the header
     for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=2, max_col=2):
         for cell in row:
-            cell.number_format = '[>=1000000]#,"M";[>=1000]#,"K";0'
+            cell.number_format = '[>=1000000]0.0,,"M";[>=1000]0.0,"K";0'
 
     # Create a LineChart
     chart = LineChart()
