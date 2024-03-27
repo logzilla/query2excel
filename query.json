@@ -6,10 +6,10 @@
     },
     "filter": [
       {
-        "field": "cisco_mnemonic",
+        "field": "program",
         "op": "eq",
         "value": [
-        "CIMC-5-LINK_MISSING"
+        "Cisco"
     ]
       }
     ],

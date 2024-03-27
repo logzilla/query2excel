@@ -22,9 +22,11 @@ parser.add_argument("-v", "--verbose", help="Increase output verbosity.", action
 parser.add_argument("-d", "--debug", help="Show debug information.", action="store_true")
 args = parser.parse_args()
 
-# Environment variables for API key and URL
+# Environment variables for API key, URL, max attempts, and attempt delay
 LOGZILLA_INSTANCE = os.getenv("LOGZILLA_INSTANCE")
 API_KEY = os.getenv("API_KEY")
+QUERY_MAX_ATTEMPTS = int(os.getenv("QUERY_MAX_ATTEMPTS", 5))  # Default to 5 if not set
+QUERY_DELAY = int(os.getenv("QUERY_DELAY", 5))  # Default to 5 seconds if not set
 
 def debug_log(message):
     if args.debug:
@@ -59,11 +61,10 @@ def start_query():
 
     return response.json().get("query_id")
 
-
 # Function to retrieve query results
 def retrieve_results(query_id):
-    max_attempts = 5
-    attempt_delay = 5  # seconds to wait between attempts
+    max_attempts = QUERY_MAX_ATTEMPTS
+    attempt_delay = QUERY_DELAY  # seconds to wait between attempts
     for attempt in range(1, max_attempts + 1):
         verbose_log(f"Attempt {attempt} to retrieve results for query ID {query_id}")
         url = f"{LOGZILLA_INSTANCE}/api/query/{query_id}"
