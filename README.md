@@ -32,7 +32,7 @@ Run the script:
 ```
 This will write a file named `report.xlsx`
 
-#####Sample Excel output:
+**Sample Excel output:**
 
 ![Sample](img/screenshot.jpg)
 
