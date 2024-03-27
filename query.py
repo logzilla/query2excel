@@ -62,8 +62,8 @@ def start_query():
 
 # Function to retrieve query results
 def retrieve_results(query_id):
-    max_attempts = 50
-    attempt_delay = 10  # seconds to wait between attempts
+    max_attempts = 5
+    attempt_delay = 5  # seconds to wait between attempts
     for attempt in range(1, max_attempts + 1):
         verbose_log(f"Attempt {attempt} to retrieve results for query ID {query_id}")
         url = f"{LOGZILLA_INSTANCE}/api/query/{query_id}"
@@ -78,7 +78,9 @@ def retrieve_results(query_id):
 
         response_json = response.json()
         if response_json.get('status') == "IN_PROGRESS":
-            verbose_log("Query is still in progress. Waiting before next attempt...")
+            progress = response_json.get('progress', 0)
+            # Display progress bar
+            progress_bar(progress)
             time.sleep(attempt_delay)  # Wait before the next attempt
             continue  # Skip the rest of the current loop iteration
         elif 'results' in response_json:
@@ -89,6 +91,25 @@ def retrieve_results(query_id):
 
     verbose_log("Query results not ready after maximum attempts.")
     exit(1)
+
+def progress_bar(progress, bar_length=40):
+    """Displays or updates a console progress bar.
+
+    Args:
+        progress (float): The current progress as a percentage (0 to 100).
+        bar_length (int): The character length of the bar.
+    """
+    progress_fraction = progress / 100
+    arrow = int(progress_fraction * bar_length - 1) * '-' + '>'
+    spaces = (bar_length - len(arrow)) * ' '
+
+    # The \r character is used to return the cursor to the start of the line.
+    print(f"\rProgress: [{arrow + spaces}] {progress:.2f}%", end="")
+
+    if progress >= 100:
+        print()  # Move to the next line when done
+
+
 def create_excel_with_chart(data):
     # Convert the data into a DataFrame
     df = pd.json_normalize(data['results']['details'])
@@ -113,7 +134,7 @@ def create_excel_with_chart(data):
     # Apply the number format to all cells in the 'Count' column except the header
     for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=2, max_col=2):
         for cell in row:
-            cell.number_format = '[>=999950]0.00,,"M";[<=-999950]0.00,,"M";0.00,"K"'
+            cell.number_format = '[>=1000000]#,"M";[>=1000]#,"K";0'
 
     # Create a LineChart
     chart = LineChart()
